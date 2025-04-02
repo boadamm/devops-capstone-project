@@ -13,7 +13,7 @@ from flask_cors import CORS
 
 # Create Flask application
 app = Flask(__name__)
-Talisman(app, force_https=False)
+talisman = Talisman(app, force_https=False)
 CORS(app)
 app.config.from_object(config)
 

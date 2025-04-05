@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts
+  labels:
+    app: accounts
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: accounts
+  template:
+    metadata:
+      labels:
+        app: accounts
+    spec:
+      containers:
+        - name: accounts
+          image: us.icr.io/YOUR_NAMESPACE/accounts:1  # kendi namespace’inle değiştir
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DATABASE_HOST
+              value: postgres
+            - name: DATABASE_NAME
+              value: postgres
+            - name: DATABASE_USER
+              value: postgres
+            - name: DATABASE_PASSWORD
+              value: postgres

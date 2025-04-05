@@ -3,16 +3,19 @@ kind: Pipeline
 metadata:
   name: cd-pipeline
 spec:
-  description: |
-    This pipeline clones a repo, lints the code, runs tests,
-    builds a Docker image, and deploys it to Kubernetes.
   params:
     - name: repo-url
       type: string
     - name: branch
       type: string
+      default: main
+    - name: build-image
+      type: string
+      description: Name of the image to build
+
   workspaces:
     - name: pipeline-workspace
+
   tasks:
     - name: clone
       workspaces:
@@ -22,9 +25,9 @@ spec:
         name: git-clone
       params:
         - name: url
-          value: $(params.repo-url)
+          value: "$(params.repo-url)"
         - name: revision
-          value: $(params.branch)
+          value: "$(params.branch)"
         - name: deleteExisting
           value: "true"
 
@@ -38,7 +41,11 @@ spec:
         - name: image
           value: "python:3.9-slim"
         - name: args
-          value: ["--count","--max-complexity=10","--max-line-length=127","--statistics"]
+          value:
+            - "--count"
+            - "--max-complexity=10"
+            - "--max-line-length=127"
+            - "--statistics"
       runAfter:
         - clone
 
@@ -55,3 +62,17 @@ spec:
           value: "-v --with-spec --spec-color"
       runAfter:
         - clone
+
+    - name: build
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+      taskRef:
+        name: buildah
+        kind: ClusterTask
+      params:
+        - name: IMAGE
+          value: "$(params.build-image)"
+      runAfter:
+        - lint
+        - tests
